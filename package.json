@@ -1,0 +1,14 @@
+{
+	"name": "jsgamelib",
+	"description": "A Fork of p5play.js under GPL",
+	"license": "GPL-3.0-only",
+	"main": "jsgamelib.js",
+	"scripts": {
+		"min": "minify jsgamelib.js > jsgamelib.min.js",
+		"v": "npm version patch --force",
+		"V": "npm version minor --force",
+		"version": "git add -A",
+		"postversion": "git push"
+	},
+	"version": "1.0.0"
+}
