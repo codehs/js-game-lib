@@ -1602,6 +1602,10 @@ class Group extends Array<Sprite> {
      * Its useful for debugging.
      * @type {Number}
      */
+    /**
+     * @type {Number}
+     */
+    opacity: number;
     idNum: number;
     /**
      * Groups can have subgroups, which inherit the properties

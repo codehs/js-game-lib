@@ -743,7 +743,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Number}
 			 * @default 1
 			 */
-			this._opacity = 1;
+			this._opacity ??= 1;
 		}
 
 		/**
@@ -3774,7 +3774,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		bearing: 'number', // 39
 		textSize: 'number', // 40
 		textStroke: 'color', // 41
-		textStrokeWeight: 'number' // 42
+		textStrokeWeight: 'number', // 42
+		opacity: 'number' // 43
 	};
 
 	this.Sprite.props = Object.keys(this.Sprite.propTypes);
@@ -4889,6 +4890,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Number}
 			 */
 			this.width;
+			/**
+			 * @type {Number}
+			 */
+			this.opacity;
 
 			/**
 			 * Each group has a unique id number. Don't change it!
