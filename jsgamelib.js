@@ -3100,6 +3100,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 * Calculates the distance between the sprite and another sprite.
+		 *
+		 * @param {Sprite} sprite
+		 * @returns {Number} the distance
+		 */
+		distanceTo(sprite) {
+			return this.p.dist(this.x, this.y, sprite.x, sprite.y);
+		}
+
+		/**
 		 * Rotates the sprite towards an angle or position
 		 * with x and y properties.
 		 *
@@ -5895,7 +5905,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			g.sort((a, b) => a._layer - b._layer);
 			for (let i = 0; i < g.length; i++) {
 				let sprite = g[i];
-				if (sprite._life != 2147483647 && sprite._life-- < 0) {
+				if (sprite._life != 2147483647 && (sprite._life -= this.p.world.timeScale) < 0) {
 					sprite.remove();
 					g.splice(i, 1);
 					i--;
@@ -6183,6 +6193,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 
 			this.velocityThreshold = 0.19;
+			this.timeScale = 1;
+			this._physicsTime = 0;
 
 			this.mouseTracking ??= true;
 			this.mouseSprite = null;
@@ -6225,6 +6237,38 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 * The rate at which the physics of the world is advanced.
+		 * Recommended range is 0 to 2.
+		 *
+		 * @type {Number}
+		 * @default 1
+		 */
+		get timeScale() {
+			return this._timeScale;
+		}
+		set timeScale(val) {
+			this._timeScale = val;
+		}
+
+		/**
+		 * The number of seconds that have passed since the start of the sketch.
+		 *
+		 * @type {Number}
+		 */
+		get realTime() {
+			return this.p.millis() / 1000.0;
+		}
+
+		/**
+		 * The number of seconds that have passed in the physics simulation.
+		 *
+		 * @type {Number}
+		 */
+		get physicsTime() {
+			return this._physicsTime;
+		}
+
+		/**
 		 * Performs a physics simulation step that advances all sprites'
 		 * forward in time by 1/60th of a second if no timeStep is given.
 		 *
@@ -6244,7 +6288,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				s.prevPos.y = s.y;
 				s.prevRotation = s.rotation;
 			}
-			super.step(timeStep || 1 / (this.p._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
+			timeStep = timeStep || (1 / (this.p._targetFrameRate || 60) * this._timeScale);
+			this._physicsTime += timeStep;
+			super.step(timeStep, velocityIterations || 8, positionIterations || 3);
 
 			let sprites = Object.values(this.p.p5play.sprites);
 			let groups = Object.values(this.p.p5play.groups);
