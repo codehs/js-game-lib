@@ -761,6 +761,13 @@ class Sprite {
      * @default true
      */
     get visible(): boolean;
+    set opacity(arg: number);
+    /**
+     * The opacity of the sprite, controls how transparent the sprite appears.
+     * @type {Number}
+     * @default 1
+     */
+    get opacity(): number;
     set pos(arg: p5.Vector);
     /**
      * The position vector {x, y}

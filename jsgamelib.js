@@ -737,6 +737,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this._textFill ??= this.p.color(0);
 			this._textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
+		
+			/**
+			 * The opacity of the sprite.
+			 * @type {Number}
+			 * @default 1
+			 */
+			this._opacity = 1;
 		}
 
 		/**
@@ -2143,6 +2150,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 * The opacity of the sprite, controls how transparent the sprite appears.
+		 * @type {Number}
+		 * @default 1
+		 */
+		get opacity() {
+			return this._opacity;
+		}
+		set opacity(val) {
+			this._opacity = val;
+		}
+
+		/**
 		 * The horizontal position of the sprite.
 		 * @type {Number}
 		 */
@@ -2680,7 +2699,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this.p.fill(this.color);
 
-			this._draw();
+			// Apply opacity
+			if (this._opacity !== 1) {
+				let currentAlpha = this.p.drawingContext.globalAlpha;
+				this.p.drawingContext.globalAlpha = currentAlpha * this._opacity;
+				this._draw();
+				this.p.drawingContext.globalAlpha = currentAlpha;
+			} else {
+				this._draw();
+			}
 
 			this.p.pop();
 			this._cameraActiveWhenDrawn = this.p.camera.active;
