@@ -6505,6 +6505,93 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set allowSleeping(val) {
 			this.setAllowSleeping(val);
 		}
+
+		/**
+		 * Raycasts from a start position and returns the first sprite that is hit.
+		 *
+		 * Optionally you can specify a limiter function to filter the results.
+		 *
+		 * @param {Object} startPos
+		 * @param {Object} stopPos
+		 * @param {Function} limiter
+		 * @returns {Sprite} a sprite
+		 */
+		rayCast(...args) {
+			return this._rayCast(true, ...args);
+		}
+
+		/**
+		 * Raycasts from a start position and returns all sprites that are hit.
+		 *
+		 * Optionally you can specify a limiter function to filter the results.
+		 *
+		 * @param {Object} startPos
+		 * @param {Object} stopPos
+		 * @param {Function} limiter
+		 * @returns {Sprite} a sprite
+		 */
+		rayCastAll(...args) {
+			return this._rayCast(false, ...args);
+		}
+
+		/**
+		 * Raycasts from a start position
+		 *
+		 * Optionally you can specify a limiter function to filter the results.
+		 *
+		 * @param {Boolean} returnOne
+		 * @param {Object} startPos
+		 * @param {Object} stopPos
+		 * @param {Function} limiter
+		 * @returns {Sprite[]} a list of sprites
+		 */
+		_rayCast(returnOne, startPos, stopPos) {
+			// Use tile size if sprites are provided. Otherwise default to 1.
+			let startTileSize = startPos.tileSize ?? 1;
+			let stopTileSize = stopPos.tileSize ?? 1;
+			let args = Array.from(arguments);
+
+			// Allow for also passing in a direction and magnitude
+			if (!stopPos.hasOwnProperty('x') || !stopPos.hasOwnProperty('y')) {
+				let direction = args[2];
+				let magnitude = args.splice(3, 1)[0];
+				stopTileSize = startTileSize;
+				stopPos = {
+					x: startPos.x + Math.cos(direction) * magnitude,
+					y: startPos.y + Math.sin(direction) * magnitude
+				};
+			}
+
+			// Scale the positions to the tile size
+			startPos = scaleTo(startPos.x, startPos.y, startTileSize);
+			stopPos = scaleTo(stopPos.x, stopPos.y, stopTileSize);
+
+			// Get all raycast matches
+			let matches = [];
+			super.rayCast(startPos, stopPos, function (fixture, _1, _2, fraction) {
+				let sprite = fixture.m_body.sprite;
+				matches.push([sprite, fraction]);
+				return -1;
+			});
+
+			let minFraction = 1;
+			let limitingSprite = undefined;
+			// If no limiter, either return the first sprite or all sprites
+			let limiter = args[3] ?? (() => returnOne);
+			for (let [sprite, fraction] of matches) {
+				if (limiter(sprite) && fraction < minFraction) {
+					minFraction = fraction;
+					limitingSprite = sprite;
+				}
+			}
+			if (returnOne) {
+				return limitingSprite;
+			}
+
+			matches = matches.filter(([sprite, fraction]) => fraction <= minFraction);
+			matches = matches.sort(([_A, fractionA], [_B, fractionB]) => fractionA - fractionB);
+			return matches.map(([sprite, _]) => sprite);
+		}
 	};
 
 	this.Camera = class {
