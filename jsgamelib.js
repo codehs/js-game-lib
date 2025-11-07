@@ -8005,7 +8005,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.sleep = (milliseconds) => {
 		if (!milliseconds) {
 			return new Promise((resolve) => {
-				this.canvas.addEventListener('p5play_world_step', resolve);
+				const handler = () => {
+					this.canvas.removeEventListener('p5play_world_step', handler);
+					resolve();
+				};
+				this.canvas.addEventListener('p5play_world_step', handler);
 			});
 		}
 		return this.delay(milliseconds);
